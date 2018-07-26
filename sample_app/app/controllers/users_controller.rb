@@ -4,13 +4,14 @@ class UsersController < ApplicationController
   before_action :admin_user,     only: :destroy
 
   def index
-    @users = User.where(activated: FILL_IN).paginate(page: params[:page])
+    @users = User.paginate(page: params[:page])
   end
 
   def show
     @user = User.find(params[:id])
-    redirect_to root_url and return unless FILL_IN
+    @microposts = @user.microposts.paginate(page: params[:page])
   end
+
   def new
     @user = User.new
   end
@@ -19,13 +20,8 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
     if @user.save
       @user.send_activation_email
-      # UserMailer.account_activation(@user).deliver_now
       flash[:info] = "Please check your email to activate your account."
       redirect_to root_url
-      # log_in @user
-      # flash[:success] = "Welcome to the Sample App!"
-      # redirect_to @user
-      # Handle a successful save.
     else
       render 'new'
     end
@@ -70,7 +66,6 @@ class UsersController < ApplicationController
     # Confirms the correct user.
     def correct_user
       @user = User.find(params[:id])
-      # redirect_to(root_url) unless @user == current_user
       redirect_to(root_url) unless current_user?(@user)
     end
 
